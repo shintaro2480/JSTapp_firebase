@@ -2,6 +2,12 @@
   <div>
     <h1>JSTアプリ</h1>
     <p>ログイン中</p>
+    <nav>
+      <ul>
+        <li><router-link to="/">Home</router-link></li>
+        <li><router-link to="/restaurant">Post Restaurant</router-link></li>
+      </ul>
+    </nav>
     <div>
       <button class="py-1 px-4 bg-gray-800 text-white rounded" @click="signOut">サインアウト</button>
     </div>

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/HomeView.vue'
 import Register from '../views/RegisterView.vue'
 import SignIn from '../views/SignInView.vue'
+import Restaurant from '../views/RestaurantView.vue'
 
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 const auth = getAuth()
@@ -35,6 +36,11 @@ const router = createRouter({
       path: '/signin',
       name: 'signIn',
       component: SignIn
+    },
+    {
+      path: '/restaurant',
+      name: 'restaurant',
+      component: Restaurant
     }
   ]
 })

@@ -8,7 +8,7 @@
     </header>
     <div class="bg-gray-100 flex-auto">
       <div class="flex justify-center mt-16">
-        <div class="w-2/5 border bg-white">
+        <div class="w-4/5 border bg-white signin">
           <div class="my-12 text-center">
             <h2 class="text-4xl font-bold">サインイン</h2>
             <p class="my-4">
@@ -18,10 +18,10 @@
             <form @submit.prevent="signIn">
               <div class="mb-2">
                 <input type="email" v-model="email" placeholder="you@example.com"
-                  class="text-xl w-3/5 p-3 border rounded" />
+                  class="text-xl w-4/5 p-3 border rounded" />
               </div>
               <div class="mb-2">
-                <input type="password" v-model="password" class="text-xl w-3/5 p-3 border rounded"
+                <input type="password" v-model="password" class="text-xl w-4/5 p-3 border rounded"
                   placeholder="パスワード" />
               </div>
               <button type="submit" class="text-xl w-3/5 bg-green-800 text-white py-2 rounded">サインイン</button>
@@ -57,3 +57,9 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+div.signin {
+  min-width: 400px;
+}
+</style>
