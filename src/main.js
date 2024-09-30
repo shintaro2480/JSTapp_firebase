@@ -24,7 +24,7 @@ app.use(createPinia())
 app.use(router)
 
 
-// Firebase Authenticationの状態を監視（オプション）
+// Firebase Authenticationの状態を監視（オプション）。ユーザー状態が変わったら
 auth.onAuthStateChanged((user) => {
   const userStore = useUserStore();
 
@@ -33,8 +33,10 @@ auth.onAuthStateChanged((user) => {
     userStore.setUser({
       displayName: user.displayName,
       email: user.email,
+      image: user.image,
     });
     console.log('ユーザーがログインしています:', user.displayName);
+
   } else {
     // ユーザーがログアウトしている場合
     userStore.clearUser();

@@ -75,7 +75,7 @@ export default {
                 // プロフィール画像のアップロード
                 let profileImageUrl = "";
         if (this.profileImage) {
-          const storageRef = ref(storage, `profiles/profile.jpg`); // Storage に画像をアップロードする場所を指定
+          const storageRef = ref(storage, `profiles/${user.uid}/profile.jpg`); // Storage に画像をアップロードする場所を指定
           await uploadBytes(storageRef, this.profileImage); // 画像をアップロード
           profileImageUrl = await getDownloadURL(storageRef); // ダウンロード URL を取得
         }
@@ -89,13 +89,11 @@ export default {
           createdAt: new Date(),
         });
 
-                // Firebase Auth にユーザーの名前とプロフィール画像 URL を設定
-                await updateProfile(user, {
+        // Firebase Auth にユーザーの名前とプロフィール画像 URL を設定
+        await updateProfile(user, {
           displayName: this.name,
           photoURL: profileImageUrl, // プロフィール画像 URL を設定
         });
-
-
 
         alert("アカウントが作成されました。ようこそ" + user.displayName + "さん。");
 

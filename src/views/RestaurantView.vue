@@ -1,4 +1,5 @@
 <template>
+<NavBar />
   <div class="flex flex-col h-screen">
     <header class="flex justify-between p-4 border-b items-center">
       <h1 class="font-semibold text-xl leading-tight">JSTアプリ</h1>
@@ -6,6 +7,7 @@
         <router-link to="/register">Slack Cloneをはじめる</router-link>
       </button>
     </header>
+    
     <div class="bg-gray-100 flex-auto">
       <div class="flex justify-center mt-16">
         <div class="w-4/5 border bg-white signin">
@@ -24,7 +26,7 @@
               <ul>
                 <!-- レストランをリスト表示 -->
                 <li class="border border-gray-300 m-2.5 p-2.5" v-for="restaurant in restaurants" :key="restaurant.id">
-                  <a :href="restaurant.url" target="_blank">{{ restaurant.title }}</a>
+                  <h2 class="font-bold"><a :href="restaurant.url" target="_blank">{{ restaurant.title }}</a></h2>
                   <p>{{ restaurant.name }} さんのおすすめ</p> <!-- ユーザー名を表示 -->
                 </li>
               </ul>
@@ -36,17 +38,25 @@
 </template>
 
 <script>
+
+import NavBar from '../components/GlobalNavComponent.vue';
+
 import { db, auth } from "../../firebase";
 import { collection, addDoc, getDocs, doc, getDoc } from "firebase/firestore";
+
+
 
 //レストランを登録する際、piniaからユーザーの名前(user.displayName)を取得したいので、piniaも準備する
 import { useUserStore } from '../stores/userStore'; // userStoreをインポート
 import { computed } from 'vue'; // computedをインポート  
 
 export default {
+  components: {
+    NavBar // コンポーネントを登録
+  },
   setup(){
     const userStore = useUserStore(); // Pinia ストアを取得
-    computed(() => userStore.user); // ユーザー情報をリアクティブに取得
+    const userPinia = computed(() => userStore.user); // ユーザー情報をリアクティブに取得
 
   },
   data() {
@@ -70,7 +80,7 @@ export default {
             title: this.title,
             url: this.url,
             userId: user.uid,
-            name: userPinia.value.displayName,
+            name: user.displayName,
             createdAt: new Date(),
           });
           alert("レストランを投稿しました！");

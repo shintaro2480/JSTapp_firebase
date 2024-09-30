@@ -1,13 +1,15 @@
 <template>
   <div>
-    <h1>JSTアプリ</h1>
     <p>ログイン中</p>
+    <NavBar /> 
+    <!--
     <nav>
-      <ul>
-        <li><router-link to="/">Home</router-link></li>
-        <li><router-link to="/restaurant">Post Restaurant</router-link></li>
+      <ul class="flex justify-center space-x-4">
+        <li class="font-bold"><router-link to="/">ホーム画面</router-link></li>
+        <li class="font-bold"><router-link to="/restaurant">おすすめのお店を投稿</router-link></li>
       </ul>
     </nav>
+    -->
     <div>
       <button class="py-1 px-4 bg-gray-800 text-white rounded" @click="signOut">サインアウト</button>
     </div>
@@ -16,8 +18,12 @@
 
 <script>
 import { getAuth, signOut } from 'firebase/auth';
+import NavBar from '../components/GlobalNavComponent.vue';
 
 export default {
+  components: {
+    NavBar // コンポーネントを登録
+  },
   methods: {
     async signOut() {
       const auth = getAuth(); // Firebase Authインスタンスの取得
