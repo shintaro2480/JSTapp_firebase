@@ -6,23 +6,43 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 
-import { auth } from '../firebase' // firebase.jsをインポート
-
 import './assets/main.css'
 import './assets/css/tailwind.css' //追加
 
-// Firebase Authenticationの状態を監視（オプション）
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    console.log('ユーザーがログインしています:', user)
-  } else {
-    console.log('ユーザーがログアウトしています')
-  }
-})
+import { auth } from '../firebase' // firebase.jsをインポート
+import { useUserStore } from './stores/userStore' // userStoreをインポート
+//import { getAuth } from 'firebase/auth' // firebase.jsをインポート
+
+//const auth = getAuth();
+//const user = auth.currentUser;
+
+
 
 const app = createApp(App)
 
 app.use(createPinia())
 app.use(router)
+
+
+// Firebase Authenticationの状態を監視（オプション）
+auth.onAuthStateChanged((user) => {
+  const userStore = useUserStore();
+
+  if (user) {
+    // ユーザーがログインしている場合
+    userStore.setUser({
+      displayName: user.displayName,
+      email: user.email,
+    });
+    console.log('ユーザーがログインしています:', user.displayName);
+  } else {
+    // ユーザーがログアウトしている場合
+    userStore.clearUser();
+    console.log('ユーザーがログアウトしています');
+  }
+
+})
+
+
 
 app.mount('#app')

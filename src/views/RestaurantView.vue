@@ -17,6 +17,17 @@
               <input v-model="url" placeholder="URL" />
               <button @click="submitRestaurant">投稿</button>
             </div>
+            <br>
+<hr>
+<br>
+            <h2>みんなのおすすめのお店</h2>
+              <ul>
+                <!-- レストランをリスト表示 -->
+                <li v-for="restaurant in restaurants" :key="restaurant.id">
+                  <a :href="restaurant.url" target="_blank">{{ restaurant.title }}</a>
+                </li>
+              </ul>
+
           </div>
         </div>
       </div>
@@ -26,13 +37,14 @@
 
 <script>
 import { db, auth } from "../../firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs } from "firebase/firestore";
 
 export default {
   data() {
     return {
       title: "",
       url: "",
+      restaurants: [], // restaurantsを追加してリアクティブにする
     };
   },
   methods: {
@@ -57,6 +69,15 @@ export default {
         alert("ログインが必要です");
       }
     },
+  },
+  async created() {
+    try {
+      const restaurantRef = collection(db, "restaurants"); // restaurantsコレクション参照
+      const snapshot = await getDocs(restaurantRef); // 全件取得
+      this.restaurants = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })); // ドキュメントを配列に変換
+    } catch (error) {
+      console.error("データの取得に失敗しました: ", error);
+    }
   },
 };
 </script>
