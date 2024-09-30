@@ -18,16 +18,16 @@
               <button @click="submitRestaurant">投稿</button>
             </div>
             <br>
-<hr>
-<br>
-            <h2>みんなのおすすめのお店</h2>
+            <hr>
+            <br>
+            <h2>全ユーザーのおすすめレストラン</h2>
               <ul>
                 <!-- レストランをリスト表示 -->
-                <li v-for="restaurant in restaurants" :key="restaurant.id">
+                <li class="border border-gray-300 m-2.5 p-2.5" v-for="restaurant in restaurants" :key="restaurant.id">
                   <a :href="restaurant.url" target="_blank">{{ restaurant.title }}</a>
+                  <p>{{ restaurant.name }} さんのおすすめ</p> <!-- ユーザー名を表示 -->
                 </li>
               </ul>
-
           </div>
         </div>
       </div>
@@ -37,30 +37,46 @@
 
 <script>
 import { db, auth } from "../../firebase";
-import { collection, addDoc, getDocs } from "firebase/firestore";
+import { collection, addDoc, getDocs, doc, getDoc } from "firebase/firestore";
+
+//レストランを登録する際、piniaからユーザーの名前(user.displayName)を取得したいので、piniaも準備する
+import { useUserStore } from '../stores/userStore'; // userStoreをインポート
+import { computed } from 'vue'; // computedをインポート  
 
 export default {
+  setup(){
+    const userStore = useUserStore(); // Pinia ストアを取得
+    computed(() => userStore.user); // ユーザー情報をリアクティブに取得
+
+  },
   data() {
     return {
       title: "",
       url: "",
-      restaurants: [], // restaurantsを追加してリアクティブにする
+      restaurants: [],
+      users: {}, // ユーザー情報を格納するオブジェクト
     };
   },
   methods: {
     async submitRestaurant() {
-      // ユーザーがログインしているか確認
+      //以下で、現在ログイン中のユーザー情報は取得できている
       const user = auth.currentUser;
       if (user) {
         try {
-          const restaurantRef = collection(db, "restaurants"); // restaurantsコレクションを参照
+          //db(FirestoreのDatabaseの中にある、restaurantコレクションに対し)
+          const restaurantRef = collection(db, "restaurants");
+          //
           await addDoc(restaurantRef, {
             title: this.title,
             url: this.url,
-            userId: user.uid, // 投稿したユーザーのIDを保存
-            createdAt: new Date(), // 投稿日時を保存
+            userId: user.uid,
+            name: userPinia.value.displayName,
+            createdAt: new Date(),
           });
           alert("レストランを投稿しました！");
+          this.title = "";
+          this.url = "";
+          await this.fetchRestaurants();
         } catch (error) {
           console.error(error);
           alert("投稿に失敗しました: " + error.message);
@@ -69,15 +85,33 @@ export default {
         alert("ログインが必要です");
       }
     },
+    async fetchRestaurants() {
+      try {
+        const restaurantRef = collection(db, "restaurants");
+        const snapshot = await getDocs(restaurantRef);
+        this.restaurants = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        await this.fetchUsers(); // ユーザー情報も取得
+      } catch (error) {
+        console.error("データの取得に失敗しました: ", error);
+      }
+    },
+    async fetchUsers() {
+      try {
+        const userRef = collection(db, "users"); // ユーザーコレクションを参照
+        const snapshot = await getDocs(userRef);
+        snapshot.docs.forEach((doc) => {
+          this.users[doc.id] = doc.data(); // ユーザーIDをキーにしてユーザー情報を格納
+        });
+      } catch (error) {
+        console.error("ユーザーの取得に失敗しました: ", error);
+      }
+    },
+    // getUserName(userId) {
+    //   return this.users[userId] ? this.users[userId].name : "不明"; // ユーザー名を返す
+    // },
   },
   async created() {
-    try {
-      const restaurantRef = collection(db, "restaurants"); // restaurantsコレクション参照
-      const snapshot = await getDocs(restaurantRef); // 全件取得
-      this.restaurants = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })); // ドキュメントを配列に変換
-    } catch (error) {
-      console.error("データの取得に失敗しました: ", error);
-    }
+    await this.fetchRestaurants();
   },
 };
 </script>

@@ -27,7 +27,11 @@
               <div class="mb-2">
                 <input type="password" v-model="password" class="text-xl w-3/5 p-3 border rounded"
                   placeholder="パスワード" />
+                </div>
+              <div class="mb-2">
+                <input type="file" @change="handleFileChange" class="text-xl w-3/5 p-3 border rounded" />
               </div>
+              
               <button type="submit" class="text-xl w-3/5 bg-green-800 text-white py-2 rounded">ユーザの登録</button>
               <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
             </form>
@@ -42,6 +46,11 @@
 import { auth } from "../../firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 
+import { db, storage } from "../../firebase"; // Firestore と Storage のインポート
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Storage に関する関数
+import { doc, setDoc } from "firebase/firestore"; // Firestore に関する関数
+
+
 export default {
   data() {
     return {
@@ -49,18 +58,44 @@ export default {
       email: "",
       password: "",
       errorMessage: "",
+      profileImage: null, // プロフィール画像用
     };
   },
   methods: {
+    handleFileChange(event) {
+      this.profileImage = event.target.files[0]; // 選択されたファイルを取得
+      console.log(this.profileImage);
+    },
     async registerUser() {
       try {
+        //初期設定
         const userCredential = await createUserWithEmailAndPassword(auth, this.email, this.password);
         const user = userCredential.user;
 
-        //ユーザーの名前を設定
-        await updateProfile(user, {
-          displayName: this.name, //ユーザー名を設定
+                // プロフィール画像のアップロード
+                let profileImageUrl = "";
+        if (this.profileImage) {
+          const storageRef = ref(storage, `profiles/profile.jpg`); // Storage に画像をアップロードする場所を指定
+          await uploadBytes(storageRef, this.profileImage); // 画像をアップロード
+          profileImageUrl = await getDownloadURL(storageRef); // ダウンロード URL を取得
+        }
+
+        // Firestore にユーザー情報を保存
+        const userRef = doc(db, "users", user.uid); // Firestore の "users" コレクションに保存
+        await setDoc(userRef, {
+          name: this.name,
+          email: this.email,
+          profileImageUrl: profileImageUrl, // 画像の URL も保存
+          createdAt: new Date(),
         });
+
+                // Firebase Auth にユーザーの名前とプロフィール画像 URL を設定
+                await updateProfile(user, {
+          displayName: this.name,
+          photoURL: profileImageUrl, // プロフィール画像 URL を設定
+        });
+
+
 
         alert("アカウントが作成されました。ようこそ" + user.displayName + "さん。");
 

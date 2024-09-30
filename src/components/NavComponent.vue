@@ -1,8 +1,8 @@
 <template>
     <nav>
-      <h1>My App</h1>
-      <div v-if="user">
-        <p>ようこそ、{{ user.displayName }}!</p>
+      <div v-if="user" class="flex justify-between items-center m-2">
+        <p>ようこそ <b>{{ user.displayName }}</b>さん
+        </p>
         <p>Email: {{ user.email }}</p>
       </div>
       <div v-else>
